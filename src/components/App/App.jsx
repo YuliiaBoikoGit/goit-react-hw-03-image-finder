@@ -1,14 +1,13 @@
 import React from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { ThreeDots } from  'react-loader-spinner'
-import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import { Container, Info } from "./App.styled";
 import { Searchbar } from 'components/Searchbar/Searchbar';
 import { Gallery } from 'components/ImageGallery/ImageGallery';
 import { LoadButton } from 'components/Button/Button';
 import { fetchImages } from "api/galleryApi";
 import { Modal } from 'components/Modal/Modal';
+import { PageLoader } from 'components/Loader/Loader';
 
 export class App extends React.Component {
   state = {
@@ -86,7 +85,7 @@ export class App extends React.Component {
         <>
           <Container>
             <Searchbar onSubmit={this.handleFormSubmit} />
-            <ThreeDots color="gray" height={100} width={100} ariaLabel='loading' />
+            <PageLoader />
             <ToastContainer position="top-center" />
           </Container>
         </>
