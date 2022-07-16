@@ -6,3 +6,10 @@ export const Container = styled.div`
   grid-gap: 16px;
   padding-bottom: 24px;
 `;
+
+export const Info = styled.p`
+  margin-right: auto;
+  margin-left: auto;
+  font-size: 24px;
+  color: gray;
+`;

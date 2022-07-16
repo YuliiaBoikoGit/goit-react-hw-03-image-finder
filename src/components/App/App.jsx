@@ -1,22 +1,31 @@
 import React from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Container } from "./App.styled";
+import { ThreeDots } from  'react-loader-spinner'
+import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
+import { Container, Info } from "./App.styled";
 import { Searchbar } from 'components/Searchbar/Searchbar';
 import { Gallery } from 'components/ImageGallery/ImageGallery';
 import { LoadButton } from 'components/Button/Button';
 import { fetchImages } from "api/galleryApi";
+import { Modal } from 'components/Modal/Modal';
 
 export class App extends React.Component {
   state = {
     imageName: '',
     page: 1,
     images: [],
+    error: '',
+    showModal: false,
+    largeImage: '',
+    status: 'idle',
   };
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.imageName !== this.state.imageName) {
-      this.getImages();
+      this.setState({ status: 'pending' });
+      this.getImages()
+        .catch(error => this.setState({ error, status: 'rejected' }));
     };
   };
 
@@ -28,26 +37,88 @@ export class App extends React.Component {
     });
   };
 
+  handleLargeImage = largeImageURL => {
+    this.setState({
+      largeImage: largeImageURL,
+      showModal: true,
+    });
+  };
+
+  toggleModal = () => {
+    this.setState(prevState => ({
+      showModal: !prevState.showModal,
+      largeImage: '',
+    }));
+  };
+
   getImages = async () => {
     const { imageName, page } = this.state;
-    const { hits } = await fetchImages(imageName, page);
+    const data = await fetchImages(imageName, page);
+    
+    if (data.hits.length === 0) {
+        return Promise.reject(new Error('Sorry, there are no images matching your search query. Please try again.'));
+    };
 
     this.setState(prevState => ({
-      images: [...prevState.images, ...hits],
+      images: [...prevState.images, ...data.hits],
       page: prevState.page + 1,
+      status: 'resolved',
     }));
   };
 
   render() {
-    const showLoadMoreBtn = this.state.images.length > 0 && this.state.images.length >= 12;
+    const { images, showModal, largeImage, error, status } = this.state;
 
-    return (
-      <Container>
-        <Searchbar onSubmit={this.handleFormSubmit} />
-        <Gallery images={this.state.images} />
-        {showLoadMoreBtn && <LoadButton onClick={this.getImages} />}
-        <ToastContainer position="top-center"/>
-      </Container>
-    );
+    if (status === 'idle') {
+      return (
+        <>
+          <Container>
+            <Searchbar onSubmit={this.handleFormSubmit} />
+            <Info>Your query is empty...</Info>
+            <ToastContainer position="top-center" />
+          </Container>
+        </>
+      );
+    };
+
+    if (status === 'pending') {
+      return (
+        <>
+          <Container>
+            <Searchbar onSubmit={this.handleFormSubmit} />
+            <ThreeDots color="gray" height={100} width={100} ariaLabel='loading' />
+            <ToastContainer position="top-center" />
+          </Container>
+        </>
+      );
+    };
+
+    if (status === 'rejected') {
+      return (
+        <>
+          <Container>
+            <Searchbar onSubmit={this.handleFormSubmit} />
+            <Info>{error.message}</Info>
+            <ToastContainer position="top-center" />
+          </Container>
+        </>
+      );
+    };
+
+    if (status === 'resolved') {
+      return (
+        <>
+          <Container>
+            <Searchbar onSubmit={this.handleFormSubmit} />
+            <Gallery images={images} onImgClick={this.handleLargeImage} />
+              {images.length >= 12 && <LoadButton onClick={this.getImages} />}
+              {showModal && <Modal onClose={this.toggleModal}>
+                <img src={largeImage} alt="" />
+              </Modal>}
+            <ToastContainer position="top-center" />
+          </Container>
+        </>
+      );
+    };
   };
 };
