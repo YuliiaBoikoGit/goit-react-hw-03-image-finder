@@ -13,6 +13,10 @@ export const Gallery = ({images, onImgClick}) => {
 };
 
 Gallery.propTypes = {
-    images: PropTypes.array,
+    images: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.number.isRequired,
+        }),
+    ),        
     onImgClick: PropTypes.func.isRequired,
 };

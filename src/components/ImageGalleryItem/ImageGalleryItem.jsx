@@ -12,13 +12,10 @@ export const GalleryItem = ({image, onImgClick}) => {
 };
 
 GalleryItem.propTypes = {
-    images: PropTypes.arrayOf(
-        PropTypes.shape({
-            id: PropTypes.number.isRequired,
+    image: PropTypes.shape({
             webformatURL: PropTypes.string.isRequired,
             largeImageURL: PropTypes.string.isRequired,
             tags: PropTypes.string.isRequired,
         }),
-    ),
     onImgClick: PropTypes.func.isRequired,
 };
