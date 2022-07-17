@@ -105,12 +105,14 @@ export class App extends React.Component {
     };
 
     if (status === 'resolved') {
+      const itemsPerPage = 12;
+
       return (
         <>
           <Container>
             <Searchbar onSubmit={this.handleFormSubmit} />
             <Gallery images={images} onImgClick={this.handleLargeImage} />
-              {images.length >= 12 && <LoadButton onClick={this.getImages} />}
+              {images.length >= itemsPerPage && <LoadButton onClick={this.getImages} />}
               {showModal && <Modal onClose={this.toggleModal}>
                 <img src={largeImage} alt="" />
               </Modal>}
