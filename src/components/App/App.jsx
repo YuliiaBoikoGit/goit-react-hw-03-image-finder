@@ -1,5 +1,6 @@
 import React from 'react';
 import { ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Container, Info } from "./App.styled";
 import { Searchbar } from 'components/Searchbar/Searchbar';
@@ -54,8 +55,15 @@ export class App extends React.Component {
     const { imageName, page } = this.state;
     const data = await fetchImages(imageName, page);
     
+    if (data.total === 0) {
+      throw new Error('Sorry, there are no images matching your search query. Please try again.');
+    };
+
     if (data.hits.length === 0) {
-        return Promise.reject(new Error('Sorry, there are no images matching your search query. Please try again.'));
+      toast.error("We're sorry, but you've reached the end of search results.");
+      this.setState({ status: 'rejected' });
+    
+      return;
     };
 
     this.setState(prevState => ({
@@ -98,6 +106,10 @@ export class App extends React.Component {
           <Container>
             <Searchbar onSubmit={this.handleFormSubmit} />
             <Info>{error.message}</Info>
+            <Gallery images={images} onImgClick={this.handleLargeImage} />
+              {showModal && <Modal onClose={this.toggleModal}>
+                <img src={largeImage} alt="" />
+              </Modal>}
             <ToastContainer position="top-center" />
           </Container>
         </>
@@ -112,7 +124,7 @@ export class App extends React.Component {
           <Container>
             <Searchbar onSubmit={this.handleFormSubmit} />
             <Gallery images={images} onImgClick={this.handleLargeImage} />
-              {images.length >= itemsPerPage && <LoadButton onClick={this.getImages} />}
+            {images.length >= itemsPerPage && <LoadButton onClick={this.getImages} />}
               {showModal && <Modal onClose={this.toggleModal}>
                 <img src={largeImage} alt="" />
               </Modal>}
